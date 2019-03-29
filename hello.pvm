@@ -1,0 +1,5 @@
+set name "Pebaz"
+print name
+print name
+set name "Protodip"
+print name
