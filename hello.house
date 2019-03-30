@@ -10,12 +10,14 @@ set name "Protodip"
 print name
 
 set age 24
-print age %% DO THIS
+print age
 
 set bool TRUE
 print bool
 
-set trubber age
+set trubber age  %% Reference
 print trubber
 
-print "HELLO WORLD"
+print "HELLO\sWORLD1"
+set greeting "HELLO\s\s\s\s!\nWORLD2"
+print greeting

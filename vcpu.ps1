@@ -39,6 +39,9 @@ function set-var($name, $value)
 
 function print-value($value)
 {
+	Write-Host $(eval-value($value))
+	return
+
 	if ($value -is [String] -and !($value.StartsWith("`"")))
 	{
 		Write-Host $(eval-value($value))
@@ -64,7 +67,7 @@ function eval-value($value)
 	# Pure String (e.g. `"Pebaz"`)
 	elseif ($value -is [String])
 	{
-		return $value.Substring(1, $value.length - 2)
+		return $value.Substring(1, $value.length - 2).replace('\s', ' ').replace('\n', "`n")
 	}
 
 	# Other Values (e.g. 123)
@@ -93,10 +96,45 @@ function lookup($name)
 
 function decode($inst)
 {
-	$instruction = $inst.trim().split(" ") | % { $_.trim() }
+	# TODO(pebaz): Make sure this does not strip strings
+	$instruction = $inst.trim().split(" ") #| % { $_.trim() }
 
-	$func = $instruction[0]
-	$args = $instruction[1..($instruction.Count-1)]
+	$instructions = @()
+	$stringed = $False
+	$string_buffer = ""
+
+	# Gather all strings
+	foreach ($i in $instruction)
+	{
+		if ($i.length -eq 0) { continue }
+
+		if ($i.startswith('"'))
+		{
+			# Write-Host -ForegroundColor Cyan "STRING START `"$i`""
+			$stringed = $True
+		}
+
+		if ($i.endswith('"'))
+		{
+			# Write-Host -ForegroundColor Cyan "STRING END   `"$i`""
+			$stringed = $False
+		}
+
+		if ($stringed)
+		{
+			$string_buffer += $i
+		}
+		else
+		{
+			#$instructions += if ($string_buffer.length -gt 0) { $string_buffer } else { $i }
+			$string_buffer += $i
+			$instructions += $string_buffer
+			$string_buffer = ""
+		}
+	}
+
+	$func = $instructions[0]
+	$args = $instructions[1..($instructions.Count-1)]
 
 	$values = @()
 
