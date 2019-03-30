@@ -1,14 +1,16 @@
 <#
 Todo:
 
-[ ] Translate source program into byte-code
-[ ] Parse byte-code to get
-	[ ] Function
-	[ ] Parameters
-[ ] Variable
-[ ] String
-[ ] Boolean
-[ ] 
+[✔] Translate source program into byte-code
+[✔] Parse byte-code to get
+	[✔] Function
+	[✔] Parameters
+[✔] Variable
+[✔] String
+[✔] Boolean
+[✔] Int
+[✔] Float
+[✔] Line Comment
 
 decl name
 	set name "Pebaz"
@@ -24,6 +26,10 @@ decl name
 		call print "Bubbles!" ->
 	ret None
 #>
+
+param (
+	[Parameter(Mandatory=$true)][string]$filename
+)
 
 function set-var($name, $value)
 {
@@ -61,9 +67,6 @@ function eval-value($value)
 		return $value.Substring(1, $value.length - 2)
 	}
 
-	# TODO(pebaz): Boolean
-	# ???
-
 	# Other Values (e.g. 123)
 	else
 	{
@@ -95,11 +98,66 @@ function decode($inst)
 	$func = $instruction[0]
 	$args = $instruction[1..($instruction.Count-1)]
 
+	$values = @()
+
+	<# Each arg can only be one of:
+	 - String
+	 - Number (Int/Float)
+	 - Boolean
+	 - Variable
+	#>
+
+	foreach ($i in $args)
+	{
+		# In-Line Comment
+		if ($i.startswith("%%"))
+		{
+			break
+		}
+
+		# String
+		elseif ($i -match '^".*"$')
+		{
+			$values += $i
+		}
+
+		# Float
+		elseif ($i -match '^[+-]?([0-9]*)?\.[0-9]+$')
+		{
+			$values += [Float]$i
+		}
+
+		# Int
+		elseif ($i -match '^[+-]?[0-9]+$')
+		{
+			$values += [Int]$i
+		}
+
+		# Boolean
+		elseif ($i -cmatch '^TRUE|FALSE$')
+		{
+			$values += [Boolean]$i
+		}
+
+		# Variable name
+		elseif ($i -match '^[_a-z][_a-z0-9]+$')
+		{
+			$values += $i
+		}
+
+		else
+		{
+			Write-Host -ForegroundColor Red "[Invalid Syntax][Line: $LINE_NUM]"
+			Write-Host -ForegroundColor Red "    Error Parsing: `"$i`""
+			exit
+		}
+	}
+
 	#Write-Host -ForegroundColor Green "`t$func`n`t$args"
 
 	# TODO(pebaz): Support line comments
 
-	return $func, $args
+	return $func, $values
 }
 
 function eval($inst)
@@ -109,11 +167,10 @@ function eval($inst)
 
 	#Write-Host -NoNewLine "INSTRUCTION: "
 	#Write-Host -ForegroundColor Green $func
-	
-	foreach ($arg in $args)
-	{
-		#Write-Host -ForegroundColor Blue "`t`t$arg"
-	}
+	# foreach ($arg in $args)
+	# {
+	# 	Write-Host -ForegroundColor Blue "`t`t$arg"
+	# }
 
 	switch($func)
 	{
@@ -124,16 +181,21 @@ function eval($inst)
 		{ $_ -eq "print" } {
 			print-value @args
 		}
-
-		#default { Write-Host "DEFAULT" }
 	}
 }
 
 $SYMTAB = @{}
+$LINE_NUM = 0
 
-ForEach ($line in $(Get-Content hello.pvm))
+ForEach ($line in $(Get-Content $filename))
 {
-	if ($line.trim().length -gt 0)
+	$LINE_NUM += 1
+
+	if ($line.trim().startswith("%%"))
+	{
+		continue
+	}
+	elseif ($line.trim().length -gt 0)
 	{
 		eval(decode($line.trim()))
 	}

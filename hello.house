@@ -1,0 +1,21 @@
+%% Create a variable called "name"
+set name "Pebaz"
+
+%% Print the value of name twice
+print name
+print name
+
+%% Create another variable and print it
+set name "Protodip"
+print name
+
+set age 24
+print age %% DO THIS
+
+set bool TRUE
+print bool
+
+set trubber age
+print trubber
+
+print "HELLO WORLD"
