@@ -21,3 +21,16 @@ print trubber
 print "HELLO\sWORLD1"
 set greeting "HELLO\s\s\s\s!\nWORLD2"
 print greeting
+
+%% Addition Instruction
+set a 3
+set b 4
+add a b c
+prin "3\s+\s4\s=\s"
+print c
+
+add c a c
+print c
+
+add c c c
+print c

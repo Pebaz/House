@@ -1,0 +1,4 @@
+%% A simple test
+
+set msg "Hello\sWorld!"
+print msg

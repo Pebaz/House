@@ -33,27 +33,18 @@ param (
 
 function set-var($name, $value)
 {
-	#Write-Host "Setting `"$name`" to $value"
+	#Write-Host -ForegroundColor Red "Setting `"$name`" to $value"
 	$SYMTAB[$name] = $value
 }
 
 function print-value($value)
 {
 	Write-Host $(eval-value($value))
-	return
+}
 
-	if ($value -is [String] -and !($value.StartsWith("`"")))
-	{
-		Write-Host $(eval-value($value))
-	}
-	elseif ($value -is [String])
-	{
-		Write-Host $value.Substring(1, $value.length - 2)
-	}
-	else
-	{
-		Write-Host $value
-	}
+function prin-value($value)
+{
+	Write-Host -NoNewLine $(eval-value($value))
 }
 
 function eval-value($value)
@@ -178,7 +169,7 @@ function decode($inst)
 		}
 
 		# Variable name
-		elseif ($i -match '^[_a-z][_a-z0-9]+$')
+		elseif ($i -match '^[_a-z]*[_a-z0-9]+$')
 		{
 			$values += $i
 		}
@@ -196,6 +187,19 @@ function decode($inst)
 	# TODO(pebaz): Support line comments
 
 	return $func, $values
+}
+
+function func-add($a, $b, $result)
+{
+	# Write-Host -ForegroundColor Cyan "FUNC ADD: $r"
+	# Write-Host $a $(eval-value($a))
+	# Write-Host $b $(eval-value($b))
+
+	$r = $(eval-value($a)) + $(eval-value($b))
+	$args = @($result, $($r))
+	set-var @args
+
+	# Write-Host "Result: $r Stored in $result"
 }
 
 function eval($inst)
@@ -218,6 +222,14 @@ function eval($inst)
 
 		{ $_ -eq "print" } {
 			print-value @args
+		}
+
+		{ $_ -eq "prin" } {
+			prin-value @args
+		}
+
+		{ $_ -eq "add" } {
+			func-add @args
 		}
 	}
 }
