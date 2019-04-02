@@ -12,7 +12,7 @@ Todo:
 [✔] Float
 [✔] Line Comment
 
-decl name
+	decl name
 	set name "Pebaz"
 
 	call print name ->
@@ -202,6 +202,45 @@ function func-add($a, $b, $result)
 	# Write-Host "Result: $r Stored in $result"
 }
 
+function func-sub($a, $b, $result)
+{
+	# Write-Host -ForegroundColor Cyan "FUNC ADD: $r"
+	# Write-Host $a $(eval-value($a))
+	# Write-Host $b $(eval-value($b))
+
+	$r = $(eval-value($a)) - $(eval-value($b))
+	$args = @($result, $($r))
+	set-var @args
+
+	# Write-Host "Result: $r Stored in $result"
+}
+
+function func-mul($a, $b, $result)
+{
+	# Write-Host -ForegroundColor Cyan "FUNC ADD: $r"
+	# Write-Host $a $(eval-value($a))
+	# Write-Host $b $(eval-value($b))
+
+	$r = $(eval-value($a)) * $(eval-value($b))
+	$args = @($result, $($r))
+	set-var @args
+
+	# Write-Host "Result: $r Stored in $result"
+}
+
+function func-div($a, $b, $result)
+{
+	# Write-Host -ForegroundColor Cyan "FUNC ADD: $r"
+	# Write-Host $a $(eval-value($a))
+	# Write-Host $b $(eval-value($b))
+
+	$r = $(eval-value($a)) / $(eval-value($b))
+	$args = @($result, $($r))
+	set-var @args
+
+	# Write-Host "Result: $r Stored in $result"
+}
+
 function eval($inst)
 {
 	$func = $inst[0]
@@ -216,21 +255,13 @@ function eval($inst)
 
 	switch($func)
 	{
-		{ $_ -eq "set" } {
-			set-var @args
-		}
-
-		{ $_ -eq "print" } {
-			print-value @args
-		}
-
-		{ $_ -eq "prin" } {
-			prin-value @args
-		}
-
-		{ $_ -eq "add" } {
-			func-add @args
-		}
+		{ $_ -eq "set" } { set-var @args }
+		{ $_ -eq "print" } { print-value @args }
+		{ $_ -eq "prin" } { prin-value @args }
+		{ $_ -eq "add" } { func-add @args }
+		{ $_ -eq "sub" } { func-sub @args }
+		{ $_ -eq "mul" } { func-mul @args }
+		{ $_ -eq "div" } { func-div @args }
 	}
 }
 

@@ -34,3 +34,14 @@ print c
 
 add c c c
 print c
+print ""
+
+print "Divide\sby\s2:"
+div c 2 c
+print c
+print ""
+
+print "Multiply\sby\s2:"
+mul c 2 c
+print c
+print ""
