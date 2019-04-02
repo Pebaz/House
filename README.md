@@ -1,4 +1,4 @@
-# PowerShellVCPU
+# House
 An ultra-small language virtual machine implemented in PowerShell for pure fun!
 
 ## Usage
@@ -22,8 +22,6 @@ print "Hello\sWorld!"  %% Inline Comment
 
 set name "Pebaz"
 print name             %% Variables
-
-
 ```
 
 
