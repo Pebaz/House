@@ -2,3 +2,7 @@
 
 set msg "Hello\sWorld!"
 print msg
+
+
+%% Uncomment for Error Message
+%% print f

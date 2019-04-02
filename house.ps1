@@ -28,7 +28,7 @@ Todo:
 #>
 
 param (
-	[Parameter(Mandatory=$true)][string]$filename
+	[Parameter(Mandatory=$false)][string]$filename
 )
 
 function set-var($name, $value)
@@ -74,13 +74,21 @@ function lookup($name)
 	{
 		$value = $SYMTAB[$name]
 
-		if ($value -is [String] -and !($value.StartsWith("`"")))
+		if ($value)
 		{
-			return lookup($value)
+			if ($value -is [String] -and !($value.StartsWith("`"")))
+			{
+				return lookup($value)
+			}
+			else
+			{
+				return eval-value($value)
+			}
 		}
 		else
 		{
-			return eval-value($value)
+			Write-Host -ForegroundColor Red "[Undefined Variable][Line: $LINE_NUM]"
+			Write-Host -ForegroundColor Red "    No value assigned to variable: `"$name`""
 		}
 	}
 }
@@ -178,7 +186,6 @@ function decode($inst)
 		{
 			Write-Host -ForegroundColor Red "[Invalid Syntax][Line: $LINE_NUM]"
 			Write-Host -ForegroundColor Red "    Error Parsing: `"$i`""
-			exit
 		}
 	}
 
@@ -241,6 +248,27 @@ function func-div($a, $b, $result)
 	# Write-Host "Result: $r Stored in $result"
 }
 
+function func-help($topic)
+{
+	Write-Host "`nHouse Programming Language v0.1.0"
+	$topics = @(
+		"    set <name> <value>",
+		"    print ( <name> | <value> )",
+		"    prin ( <name> | <value> )",
+		"    add <a> <b> <store-in-var-name>",
+		"    sub <a> <b> <store-in-var-name>",
+		"    mul <a> <b> <store-in-var-name>",
+		"    div <a> <b> <store-in-var-name>",
+		"    help",
+		"    exit"
+	)
+
+	foreach ($t in $topics)
+	{
+		Write-Host $t -ForegroundColor Cyan
+	}
+}
+
 function eval($inst)
 {
 	$func = $inst[0]
@@ -262,22 +290,42 @@ function eval($inst)
 		{ $_ -eq "sub" } { func-sub @args }
 		{ $_ -eq "mul" } { func-mul @args }
 		{ $_ -eq "div" } { func-div @args }
+		{ $_ -eq "help" } { func-help @args }
+		{ $_ -eq "exit" } { exit }
+
+		default {
+			Write-Host -ForegroundColor Red "[Invalid Instruction][Line: $LINE_NUM]"
+			Write-Host -ForegroundColor Red "    No Instruction Named: `"$_`""
+		}
 	}
 }
 
 $SYMTAB = @{}
 $LINE_NUM = 0
 
-ForEach ($line in $(Get-Content $filename))
-{
-	$LINE_NUM += 1
 
-	if ($line.trim().startswith("%%"))
+if ($filename.Length -ne 0)
+{
+	ForEach ($line in $(Get-Content $filename))
 	{
-		continue
+		$LINE_NUM += 1
+
+		if ($line.trim().startswith("%%"))
+		{
+			continue
+		}
+		elseif ($line.trim().length -gt 0)
+		{
+			eval(decode($line.trim()))
+		}
 	}
-	elseif ($line.trim().length -gt 0)
+}
+else
+{
+	while ($true)
 	{
+		Write-Host -NoNewLine ">>> "
+		$line = [Console]::ReadLine()
 		eval(decode($line.trim()))
 	}
 }
